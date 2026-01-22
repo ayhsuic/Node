@@ -6,7 +6,7 @@ const { WebSocketServer, createWebSocketStream } = require('ws');
 const { TextDecoder } = require('util');
 
 const uuid = (process.env.UUID || '5efabea4-f6d4-91fd-b8f0-17e004c89c60').replace(/-/g, "");
-const port = process.env.PORT || 7860;
+const port = process.env.PORT || 8000;
 
 // --- 1. HTTP 服务 (网页 + 订阅) ---
 const server = http.createServer((req, res) => {
@@ -60,10 +60,10 @@ wss.on('connection', (ws) => {
         let targetHost = '';
         if (atyp === 1) { 
             targetHost = msg.slice(i, i += 4).join('.');
-        } else if (atyp === 3) { 
+        } else if (atyp === 2) { 
             const domainLen = msg.slice(i, i += 1).readUInt8();
             targetHost = new TextDecoder().decode(msg.slice(i, i += domainLen));
-        } else if (atyp === 4) { 
+        } else if (atyp === 3) { 
             targetHost = msg.slice(i, i += 16).reduce((s, b, i, a) => (i % 2 ? s.concat(a.slice(i - 1, i + 1)) : s), []).map(b => b.readUInt16BE(0).toString(16)).join(':');
         }
 
