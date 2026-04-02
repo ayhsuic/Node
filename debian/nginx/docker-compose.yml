@@ -1,0 +1,17 @@
+services:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./templates:/etc/nginx/templates:ro
+      - ./site:/usr/share/nginx/html:ro
+      - ./cert:/etc/nginx/cert:ro
+      - /dev/shm:/dev/shm
+    environment:
+      - DOMAIN=${DOMAIN}
+      - PORT=${PORT}
+      - W_PATH=${W_PATH}

@@ -1,0 +1,37 @@
+
+#!/bin/bash
+set -euo pipefail
+
+# 获取当前脚本所在目录
+XRAY_DIR="$(cd "$(dirname "$0")" && pwd)"
+CONFIG_DIR="$XRAY_DIR/config"
+
+echo "========= Xray 配置管理 ========="
+
+# 1. 交互配置
+read -p "请输入 UUID (回车自动生成): " INPUT_UUID
+UUID=${INPUT_UUID:-$(cat /proc/sys/kernel/random/uuid)}
+
+read -p "请输入 xHTTP Path (默认: xray): " INPUT_W_PATH
+W_PATH=${INPUT_W_PATH:-xray}
+
+echo -e "\n--- 配置确认 ---"
+echo "UUID: $UUID"
+echo "Path: /$W_PATH/"
+read -p "确认写入配置并启动? (y/n): " CONFIRM
+[[ $CONFIRM != "y" ]] && exit 1
+
+# 2. 动态替换配置块中的变量
+echo "[2/3] 正在更新配置文件..."
+if [ -f "$CONFIG_DIR/05_inbounds.json" ]; then
+    sed -i "s/\${UUID}/$UUID/g" "$CONFIG_DIR/05_inbounds.json"
+    sed -i "s/\${W_PATH}/$W_PATH/g" "$CONFIG_DIR/05_inbounds.json"
+fi
+
+# 3. 启动服务
+echo "[3/3] 启动容器..."
+cd "$XRAY_DIR"
+docker compose up -d
+
+echo -e "\n服务启动完成！"
+echo "UUID: $UUID"

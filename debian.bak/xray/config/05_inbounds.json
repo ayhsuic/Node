@@ -1,0 +1,23 @@
+{
+  "inbounds": [
+    {
+      "listen": "/dev/shm/xrxh.socket,0666",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "${UUID}" 
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "xhttpSettings": {
+          "mode": "stream-one",
+          "path": "/${W_PATH}/"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>三月七的手账 ✨</title>
+
+    <!-- Fonts & Libraries -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+
+    <style>
+        :root {
+            --primary: #ff9aa2;
+            --accent: #e6a23c;
+            --sky: #a0cfff;
+            --mint: #b5ead7;
+            --paper: #fffbf5;
+            --text: #5d4637;
+            --line: rgba(230, 162, 60, 0.12);
+        }
+
+        /* Premium Textures & Background */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fdf2d9;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(255, 154, 162, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(160, 207, 255, 0.15) 0px, transparent 50%),
+                url("https://www.transparenttextures.com/patterns/cream-paper.png");
+            font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Main Container */
+        .notebook-container {
+            width: 95%;
+            max-width: 850px;
+            margin: 50px 20px;
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) rotate(1deg);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) rotate(0);
+            }
+        }
+
+        /* Fancy Header */
+        .header-decoration {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .title-text {
+            font-size: clamp(3.5rem, 12vw, 5.5rem);
+            color: var(--accent);
+            transform: rotate(-2deg);
+            display: inline-block;
+            font-weight: bold;
+            filter: drop-shadow(3px 3px 0px #fff) drop-shadow(6px 6px 0px rgba(230, 162, 60, 0.15));
+            line-height: 1;
+        }
+
+        .subtitle-text {
+            font-size: clamp(1rem, 4.5vw, 1.8rem);
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), #ffb7b2);
+            padding: 8px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            transform: rotate(1.5deg) translateY(-10px);
+            box-shadow: 0 5px 15px rgba(255, 154, 162, 0.3);
+            border: 3px solid #fff;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .flower-deco {
+            font-size: 5rem;
+            position: absolute;
+            top: -20px;
+            right: 5%;
+            color: var(--sky);
+            opacity: 0.7;
+            animation: float 5s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(10deg);
+            }
+        }
+
+        /* The Notebook Page */
+        .paper-sheet {
+            background-color: var(--paper);
+            padding: 90px 45px 60px 55px;
+            border-radius: 4px 40px 40px 4px;
+            box-shadow:
+                8px 12px 30px rgba(109, 86, 70, 0.15),
+                inset 20px 0 40px rgba(0, 0, 0, 0.02);
+            position: relative;
+            border: 1px solid rgba(230, 224, 200, 0.6);
+            /* Lined paper effect */
+            background-image: repeating-linear-gradient(transparent, transparent 31px, var(--line) 32px);
+            min-height: 600px;
+        }
+
+        /* Binder Holes */
+        .paper-sheet::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: 30px;
+            bottom: 30px;
+            width: 15px;
+            background-image: radial-gradient(circle, #e6e0cc 6px, transparent 7px);
+            background-size: 100% 45px;
+            opacity: 0.5;
+        }
+
+        /* Date Section */
+        .date-container {
+            position: absolute;
+            top: 30px;
+            left: 60px;
+            transform: rotate(-1deg);
+        }
+
+        .date-label {
+            font-size: 0.9rem;
+            color: var(--primary);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .date-value {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+        }
+
+        /* Washi Tapes */
+        .tape {
+            position: absolute;
+            height: 40px;
+            width: 150px;
+            opacity: 0.85;
+            z-index: 5;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+        }
+
+        .tape-top-right {
+            top: -15px;
+            right: 30px;
+            transform: rotate(35deg);
+            background: repeating-linear-gradient(45deg, var(--primary) 0, var(--primary) 15px, #ffb7b2 15px, #ffb7b2 30px);
+            clip-path: polygon(0 15%, 100% 0, 95% 100%, 5% 85%);
+        }
+
+        .tape-left-center {
+            top: 250px;
+            left: -35px;
+            width: 110px;
+            transform: rotate(-8deg);
+            background-color: var(--mint);
+            clip-path: polygon(5% 0, 95% 10%, 100% 90%, 0 100%);
+        }
+
+        /* Markdown Content Polish */
+        #content {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            /* Matches paper lines roughly */
+            margin-top: 15px;
+        }
+
+        #content h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin: 0.5em 0;
+            display: inline-block;
+            border-bottom: 3px double var(--primary);
+        }
+
+        #content h2 {
+            color: var(--accent);
+            font-size: 1.8rem;
+            margin: 1em 0 0.5em;
+        }
+
+        #content p {
+            margin: 0 0 1.2em;
+            text-decoration: underline var(--line);
+            text-underline-offset: 0.3em;
+        }
+
+        #content img {
+            max-width: 100%;
+            border-radius: 4px;
+            margin: 25px 0;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 8px solid white;
+            transform: rotate(0.5deg);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #content img:hover {
+            transform: scale(1.03) rotate(0deg);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        blockquote {
+            background: rgba(160, 207, 255, 0.1);
+            border-radius: 15px;
+            margin: 25px 0;
+            padding: 15px 25px;
+            position: relative;
+            font-family: "Ma Shan Zheng", cursive;
+            font-size: 1.4rem;
+        }
+
+        blockquote::before {
+            content: "“";
+            font-size: 4rem;
+            color: var(--sky);
+            position: absolute;
+            top: -15px;
+            left: 5px;
+            opacity: 0.5;
+        }
+
+        /* Todo List Customization */
+        ul {
+            list-style: none;
+            padding-left: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            width: 1.3rem;
+            height: 1.3rem;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            margin-right: 12px;
+            vertical-align: middle;
+            cursor: pointer;
+            position: relative;
+            background: #fff;
+        }
+
+        input[type="checkbox"]:checked {
+            background: var(--primary);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: "✓";
+            color: #fff;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9rem;
+        }
+
+        .footer-sticker {
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            text-align: right;
+            margin-top: 50px;
+            color: var(--accent);
+            opacity: 0.8;
+            transform: rotate(-4deg);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .paper-sheet {
+                padding: 90px 25px 50px 35px;
+                border-radius: 4px 20px 20px 4px;
+            }
+
+            .title-text {
+                font-size: 3.5rem;
+            }
+
+            .flower-deco,
+            .tape-left-center {
+                display: none;
+            }
+
+            .date-container {
+                left: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="notebook-container">
+        <header class="header-decoration">
+            <h1 class="title-text">三月七的手账</h1>
+            <div class="subtitle-text">✨ 帕姆今天也很忙！ ✨</div>
+            <div class="flower-deco">✿</div>
+        </header>
+
+        <main class="paper-sheet">
+            <div class="date-container">
+                <div class="date-label">DATE / 日期</div>
+                <div class="date-value" id="current-date">正在翻页...</div>
+            </div>
+
+            <div class="tape tape-top-right"></div>
+            <div class="tape tape-left-center"></div>
+
+            <article id="content">
+                <p>正在努力回忆今天发生了什么...</p>
+            </article>
+
+            <footer class="footer-sticker">
+                (≧∀≦)ゞ ✨
+                <div style="font-size: 0.5em; margin-top: 5px; font-weight: normal; font-family: sans-serif;">开拓者 代笔 |
+                    2024</div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Auto Update Date
+            const now = new Date();
+            document.getElementById('current-date').innerText =
+                `${now.getFullYear()} / ${String(now.getMonth() + 1).padStart(2, '0')} / ${String(now.getDate()).padStart(2, '0')}`;
+
+            // Markdown Content (Simulated DB/API)
+            const markdown = `# 今天的列车也超——和平！
+
+嘿嘿，三月七，你不在的第 N 天，想你！今天开拓任务超——顺利地完成了，回到列车上发现帕姆竟然在打扫我的房间！还说我再乱丢垃圾就要把我丢进黑洞里……呜哇，超可怕的！
+
+![手绘风格图](https://upload-bbs.miyoushe.com/upload/2025/04/13/106703484/7ab6729862d9d55c0332657fad77ed2c_4493915310945008208.jpg)
+
+> “喂，开拓者，记录可以，别把我画得太奇怪。” —— 丹恒是这么说的。
+
+哼哼，他不说我也会把他画得超——帅的！你看这张照片，是不是很有感觉？这是上次在某个星球的庆典上买到的奇怪眼镜，丹恒一开始超——抗拒的，最后还是被我说服戴上了！咔嚓！成就达成！
+
+---
+
+## 📅 行动计划 (To-Do)
+
+- [x] 完成开拓任务（得到杨叔的摸头杀！）
+- [ ] 阻止帕姆没收我的零食 🍪
+- [ ] 给三月七的相机充满电 ⚡
+- [x] ~~尝试喝杨叔的特浓咖啡~~ 失败了，睡不着...
+
+总之，今天也是收获满满的一天！等你回来，我们再一起去拍好多好多照片吧！`;
+
+            const content = document.getElementById('content');
+            content.innerHTML = marked.parse(markdown);
+
+            // Post-processing Checklist
+            content.querySelectorAll('li').forEach(li => {
+                if (li.innerText.startsWith('[x]')) {
+                    li.innerHTML = li.innerHTML.replace('[x]', '<input type="checkbox" checked disabled>');
+                } else if (li.innerText.startsWith('[ ]')) {
+                    li.innerHTML = li.innerHTML.replace('[ ]', '<input type="checkbox" disabled>');
+                }
+            });
+
+            // KaTeX Rendering
+            renderMathInElement(content, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false }
+                ],
+                throwOnError: false
+            });
+
+            // Syntax Highlighting
+            hljs.highlightAll();
+        });
+    </script>
+</body>
+
+</html>

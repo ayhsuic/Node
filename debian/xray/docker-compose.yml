@@ -1,0 +1,13 @@
+services:
+  xray:
+    image: teddysun/xray:latest
+    container_name: xray
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./config:/etc/xray
+      - data:/usr/share/xray
+volumes:
+  data:

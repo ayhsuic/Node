@@ -1,0 +1,17 @@
+services:
+  xray:
+    image: ghcr.io/xtls/xray-core:latest
+    container_name: xray
+    restart: unless-stopped
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./config:/usr/local/etc/xray:ro
+      - log:/var/log/xray
+      - data:/usr/local/share/xray/
+      - ../nginx/cert:/etc/xray/cert:ro
+      - /dev/shm:/dev/shm
+volumes:
+  log:
+  data:

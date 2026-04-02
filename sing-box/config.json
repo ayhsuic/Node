@@ -1,0 +1,31 @@
+{
+  "log": {
+    "level": "info"
+  },
+  "inbounds": [
+    {
+      "type": "vless",
+      "tag": "vless",
+      "listen": "::",
+      "listen_port": ${PORT},
+      "users": [
+        {
+          "name": "user",
+          "uuid": "${UUID}"
+        }
+      ],
+      "transport": {
+        "type": "ws",
+        "path": "${PATH}",
+        "max_early_data": 2048,
+        "early_data_header_name": "${HEAD}"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "direct",
+      "tag": "direct"
+    }
+  ]
+}

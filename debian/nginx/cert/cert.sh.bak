@@ -1,0 +1,82 @@
+#!/bin/bash
+set -euo pipefail
+
+# 获取当前脚本所在目录 (即 nginx/cert)
+DEFAULT_CERT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# --- 交互式配置部分 ---
+echo "========= ACME 证书申请交互初始化 ========="
+
+# 1. 域名配置
+read -p "请输入你的域名 (DOMAIN): " INPUT_DOMAIN
+if [ -z "$INPUT_DOMAIN" ]; then
+    echo "错误: 域名不能为空！"
+    exit 1
+fi
+DOMAIN=$INPUT_DOMAIN
+
+# 2. 邮箱配置
+read -p "请输入联系邮箱 (默认: my@example.com): " INPUT_EMAIL
+EMAIL=${INPUT_EMAIL:-my@example.com}
+
+# 3. Webroot 配置 (用于 acme.sh 验证)
+# 默认指向当前脚本所在目录的上级目录下的 site 文件夹
+DEFAULT_WEBROOT="$DEFAULT_CERT_DIR/../site"
+read -p "请输入 Webroot 路径 (默认: $DEFAULT_WEBROOT): " INPUT_WEBROOT
+WEBROOT=${INPUT_WEBROOT:-$DEFAULT_WEBROOT}
+
+# 4. 证书安装目录
+read -p "请输入证书安装目录 (默认: $DEFAULT_CERT_DIR): " INPUT_CERT_DIR
+CERT_DIR=${INPUT_CERT_DIR:-$DEFAULT_CERT_DIR}
+
+echo -e "\n--- 当前配置确认 ---"
+echo "域名: $DOMAIN"
+echo "邮箱: $EMAIL"
+echo "验证目录: $WEBROOT"
+echo "安装目录: $CERT_DIR"
+read -p "确认开始执行? (y/n): " CONFIRM
+if [[ $CONFIRM != "y" ]]; then
+    echo "脚本已终止。"
+    exit 1
+fi
+# --------------------
+
+echo "[1/5] 安装 acme.sh..."
+if ! command -v acme.sh &> /dev/null; then
+    curl https://get.acme.sh | sh -s email=$EMAIL
+    # 临时使当前 shell 生效
+    export PATH="$HOME/.acme.sh:$PATH"
+else
+    echo "acme.sh 已经安装。"
+fi
+
+# 确保可以用 acme.sh 命令
+export PATH="$HOME/.acme.sh:$PATH"
+
+echo "[2/5] 开启自动更新..."
+acme.sh --upgrade --auto-upgrade
+
+echo "[3/5] 设置默认 CA (Let's Encrypt)..."
+acme.sh --set-default-ca --server letsencrypt
+
+echo "[4/5] 申请 ECC 证书..."
+# 确保验证目录存在
+mkdir -p "$WEBROOT"
+acme.sh --issue -d "$DOMAIN" -w "$WEBROOT" --keylength ec-256 --force
+
+echo "[5/5] 安装证书到指定目录..."
+mkdir -p "$CERT_DIR"
+acme.sh --install-cert -d "$DOMAIN" \
+    --cert-file      "$CERT_DIR/$DOMAIN.cer" \
+    --key-file       "$CERT_DIR/$DOMAIN.key" \
+    --fullchain-file "$CERT_DIR/fullchain.cer" \
+    --ecc
+
+echo "--- 证书安装完成 ---"
+echo "证书位置: $CERT_DIR/$DOMAIN.cer"
+echo "密钥位置: $CERT_DIR/$DOMAIN.key"
+echo "全链位置: $CERT_DIR/fullchain.cer"
+echo ""
+echo "提示: 请记得在 Nginx 配置中引用以下路径:"
+echo "ssl_certificate /etc/nginx/cert/fullchain.cer;"
+echo "ssl_certificate_key /etc/nginx/cert/$DOMAIN.key;"
