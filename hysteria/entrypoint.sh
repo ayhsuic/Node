@@ -22,7 +22,7 @@ auth:
 masquerade:
   type: proxy
   proxy:
-    url: https://bing.com/
+    url: "${DOMAIN}"
     rewriteHost: true
 EOF
 
