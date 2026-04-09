@@ -22,11 +22,9 @@ auth:
 masquerade:
   type: proxy
   proxy:
-    url: "${DOMAIN}"
+    url: "https://${DOMAIN}"
     rewriteHost: true
 EOF
-
-/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml &
 
 echo "-----------------------------------------------------"
 echo "Hysteria v2 正在启动..."
@@ -39,5 +37,6 @@ echo "提示：首次运行需要 10-30 秒完成 DNS 验证并获取证书。"
 echo "客户端连接串 (正式证书无需 insecure):"
 echo "hy2://${PASSWORD}@${DOMAIN}:${UDP_PORT}?sni=${DOMAIN}#Hysteria"
 echo "-----------------------------------------------------"
+echo "开始运行 Hysteria 日志："
 
-wait
+exec /usr/local/bin/hysteria server -c /etc/hysteria/config.yaml
