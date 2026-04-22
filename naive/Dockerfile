@@ -2,7 +2,7 @@
 FROM golang:1.22-alpine AS builder
 RUN apk add --no-cache git
 RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
-RUN xcaddy build --with v2.7.6 github.com/caddyserver/forwardproxy= github.com/klzgrad/forwardproxy@naive
+RUN xcaddy build v2.7.6 --with github.com/caddyserver/forwardproxy=github.com/klzgrad/forwardproxy@naive
 FROM alpine:latest
 RUN apk add --no-cache ca-certificates
 COPY --from=builder /go/bin/caddy /usr/bin/caddy
