@@ -1,11 +1,11 @@
-name: Naive
+name: Build and Push Naive Proxy
 
 on:
   push:
     branches: [ "main" ]
     paths:
       - 'naive/**'
-      - '.github/workflows/naive-build.yml'
+      - '.github/workflows/naive.yml'
   workflow_dispatch:
 
 env:
@@ -47,7 +47,7 @@ jobs:
           context: .
           file: ./naive/Dockerfile
           push: true
-          tags: ${{ id.meta.outputs.tags }}
-          labels: ${{ id.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
