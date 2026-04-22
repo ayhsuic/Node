@@ -1,11 +1,13 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.22-alpine AS builder
-RUN apk add --no-cache git
-RUN go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
-RUN xcaddy build v2.7.6 --with github.com/caddyserver/forwardproxy=github.com/klzgrad/forwardproxy@naive
-FROM alpine:latest
-RUN apk add --no-cache ca-certificates
-COPY --from=builder /go/bin/caddy /usr/bin/caddy
+
+FROM caddy:2.7.5-builder-alpine AS builder
+
+RUN xcaddy build \
+    --with github.com/caddyserver/forwardproxy=github.com/klzgrad/forwardproxy@naive
+
+FROM caddy:2.7.5-alpine
+
+COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 
 ENV NAIVE_USER=user
 ENV NAIVE_PASS=password
@@ -29,5 +31,4 @@ COPY <<'EOF' /etc/caddy/Caddyfile
     }
 }
 EOF
-
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
