@@ -1,4 +1,4 @@
-name: Build and Push Naive Proxy
+name: naiveproxy
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/naive-proxy
+  IMAGE_NAME: ${{ github.repository_owner }}/naiveproxy
 
 jobs:
   build:
@@ -51,3 +51,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          provenance: false
