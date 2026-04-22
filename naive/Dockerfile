@@ -30,5 +30,4 @@ COPY <<'EOF' /etc/caddy/Caddyfile
 }
 EOF
 
-# 启动命令变得非常清爽
 CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
