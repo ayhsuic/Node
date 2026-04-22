@@ -13,7 +13,7 @@ ENV UPSTREAM=https://www.bing.com
 
 EXPOSE 8080
 
-CMD sh -c "cat <<EOF > /etc/caddy/Caddyfile
+CMD sh -c "cat <<'EOF' > /etc/caddy/Caddyfile
 :8080 {
     route {
         forward_proxy {
