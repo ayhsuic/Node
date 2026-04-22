@@ -12,7 +12,7 @@ COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 ENV NAIVE_USER=user
 ENV NAIVE_PASS=password
 ENV PORT=80
-ENV UPSTREAM=https://www.bing.com
+ENV UPSTREAM=https://cn.bing.com
 
 COPY <<'EOF' /etc/caddy/Caddyfile
 :{$PORT} {
