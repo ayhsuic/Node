@@ -9,17 +9,18 @@ FROM caddy:2.7.5-alpine
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 
-ENV NAIVE_USER=user
-ENV NAIVE_PASS=password
+ENV USER=user
+ENV PASS=password
+ENV PORT=80
 ENV UPSTREAM=https://www.bing.com
 
 EXPOSE 8080
 
 COPY <<'EOF' /etc/caddy/Caddyfile
-:8080 {
+:{$PORT} {
     route {
         forward_proxy {
-            basic_auth {$NAIVE_USER} {$NAIVE_PASS}
+            basic_auth {$USER} {$PASS}
             hide_ip
             hide_via
             probe_resistance
