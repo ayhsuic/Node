@@ -5,32 +5,37 @@ RUN xcaddy build \
     --with github.com/caddyserver/forwardproxy=github.com/klzgrad/forwardproxy@naive
 
 FROM caddy:2.7.5-alpine
+
+RUN apk add --no-cache git ca-certificates
+
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
+
+RUN git clone https://github.com/ayhsuic/ayhsuic.github.io.git /var/www/html
 
 ENV DOMAIN=
 ENV EMAIL=ayhsuic@outlook.com
-ENV UPSTREAM=https://cn.bing.com
-ENV NAIVE_USER=user
-ENV NAIVE_PASS=password
+ENV PROXY_USER=user
+ENV PROXY_PASS=password
 
 EXPOSE 80 443 443/udp
 
 COPY <<EOF /etc/caddy/Caddyfile
+{
+    order forward_proxy before file_server
+}
+
 :443, \${DOMAIN} {
     tls \${EMAIL}
-    route {
-        # 用户 1
-        forward_proxy {
-            basic_auth \${NAIVE_USER} \${NAIVE_PASS}
-            hide_ip
-            hide_via
-            probe_resistance
-        }
-
-        reverse_proxy \${UPSTREAM} {
-            header_up Host {upstream_hostport}
-            header_up X-Forwarded-Host {host}
-        }
+    
+    forward_proxy {
+        basic_auth \${PROXY_USER} \${PROXY_PASS}
+        hide_ip
+        hide_via
+        probe_resistance
+    }
+    
+    file_server {
+        root /var/www/html
     }
 }
 EOF
