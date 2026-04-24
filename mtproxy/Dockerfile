@@ -1,16 +1,25 @@
 # syntax=docker/dockerfile:1.4
-FROM alpine:3.19 AS builder
+FROM ubuntu:22.04 AS builder
 
-RUN apk add --no-cache git gcc musl-dev linux-headers openssl-dev zlib-dev make
+RUN apt-get update && apt-get install -y \
+    git \
+    build-essential \
+    libssl-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
-RUN git clone https://github.com/TelegramMessenger/MTProxy.git && \
-    cd MTProxy && \
-    make
+RUN git clone https://github.com/TelegramMessenger/MTProxy.git
 
-FROM alpine:3.19
+WORKDIR /tmp/MTProxy
+RUN make
 
-RUN apk add --no-cache openssl su-exec wget
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    openssl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /tmp/MTProxy/objs/bin/mtproto-proxy /usr/local/bin/
 RUN mkdir -p /etc/mtproxy
@@ -29,7 +38,7 @@ SECRET=${SECRET:-$(head -c 16 /dev/urandom | xxd -ps)}
 wget -q -O /etc/mtproxy/proxy-secret https://core.telegram.org/getProxySecret
 wget -q -O /etc/mtproxy/proxy-multi.conf https://core.telegram.org/getProxyConfig
 
-exec su-exec nobody /usr/local/bin/mtproto-proxy \
+exec /usr/local/bin/mtproto-proxy \
     -p 8888 \
     -H $PORT \
     -S $SECRET \
