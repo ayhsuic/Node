@@ -25,10 +25,12 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /tmp/MTProxy/objs/bin/mtproto-proxy /usr/local/bin/
 RUN mkdir -p /etc/mtproxy
 
-ENV PORT=8080 \
+ENV PORT=443 \
+    STATS_PORT=8888 \
     SECRET="" \
     DD_SECRET=false \
-    WORKERS=1
+    WORKERS=1 \
+    USER=nobody
 
 COPY --chmod=755 <<"EOF" /entrypoint.sh
 #!/bin/sh
@@ -53,7 +55,7 @@ if [ "$DD_SECRET" = "true" ]; then
     echo "Random padding enabled, secret: $SECRET"
 fi
 
-# 首次获取配置（后台持续更新）
+# 获取配置
 wget -q -O /etc/mtproxy/proxy-secret https://core.telegram.org/getProxySecret
 wget -q -O /etc/mtproxy/proxy-multi.conf https://core.telegram.org/getProxyConfig
 
@@ -66,15 +68,15 @@ wget -q -O /etc/mtproxy/proxy-multi.conf https://core.telegram.org/getProxyConfi
     done
 ) &
 
-# 运行代理
+# 运行代理（官方标准用法）
 exec /usr/local/bin/mtproto-proxy \
-    -p 8888 \
+    -u $USER \
+    -p $STATS_PORT \
     -H $PORT \
     -S $SECRET \
     --aes-pwd /etc/mtproxy/proxy-secret /etc/mtproxy/proxy-multi.conf \
-    -M $WORKERS \
-    -a 0.0.0.0:$PORT
+    -M $WORKERS
 EOF
 
-EXPOSE 8080
+EXPOSE 443 8888
 ENTRYPOINT ["/entrypoint.sh"]
