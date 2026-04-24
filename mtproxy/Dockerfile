@@ -24,9 +24,9 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /tmp/MTProxy/objs/bin/mtproto-proxy /usr/local/bin/
 RUN mkdir -p /etc/mtproxy
 
-ENV PORT=8080 \
+ENV PORT=80 \
     SECRET= \
-    DD_SECRET=false \
+    DD_SECRET=true \
     WORKERS=1
 
 COPY --chmod=755 <<"EOF" /entrypoint.sh
