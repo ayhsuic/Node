@@ -28,7 +28,7 @@ RUN mkdir -p /etc/mtproxy
 ENV PORT=443 \
     STATS_PORT=8888 \
     SECRET="" \
-    DD_SECRET=false \
+    DD_SECRET=true \
     WORKERS=1 \
     USER=nobody
 
