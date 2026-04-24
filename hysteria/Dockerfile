@@ -4,7 +4,6 @@ ENV UDP_PORT=80
 ENV PASSWORD=your-uuid-password
 ENV DOMAIN=*.example.com
 ENV EMAIL=your@email.address
-ENV CF_API_TOKEN=your_cloudflare_api_token
 
 RUN apk update && \
     apk add --no-cache curl wget ca-certificates bash && \
