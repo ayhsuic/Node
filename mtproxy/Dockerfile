@@ -1,82 +1,79 @@
 # syntax=docker/dockerfile:1.4
+# 使用上方的 syntax 声明以启用 HEREDOC 支持
+
+# --- 第一阶段：编译 ---
 FROM ubuntu:22.04 AS builder
 
-RUN apt-get update && apt-get install -y \
-    git \
-    build-essential \
-    libssl-dev \
-    zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /tmp
-RUN git clone https://github.com/TelegramMessenger/MTProxy.git
-
-WORKDIR /tmp/MTProxy
-RUN make
-
-FROM ubuntu:22.04
-
-RUN apt-get update && apt-get install -y \
-    openssl \
-    wget \
-    xxd \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /tmp/MTProxy/objs/bin/mtproto-proxy /usr/local/bin/
-RUN mkdir -p /etc/mtproxy
-
-ENV PORT=443 \
-    STATS_PORT=8888 \
-    SECRET="" \
-    DD_SECRET=true \
-    WORKERS=1 \
-    USER=nobody
-
-COPY --chmod=755 <<"EOF" /entrypoint.sh
-#!/bin/sh
-
-# 生成或使用提供的 SECRET
-if [ -z "$SECRET" ]; then
-    SECRET=$(head -c 16 /dev/urandom | xxd -ps | tr -d '\n')
-    echo "Generated secret: $SECRET"
-else
-    echo "Using provided secret: $SECRET"
-fi
-
-# 验证 secret 长度
-if [ ${#SECRET} -ne 32 ]; then
-    echo "ERROR: SECRET must be exactly 32 hex characters, got ${#SECRET}: $SECRET"
-    exit 1
-fi
-
-# 启用随机填充
-if [ "$DD_SECRET" = "true" ]; then
-    SECRET="dd$SECRET"
-    echo "Random padding enabled, secret: $SECRET"
-fi
-
-# 获取配置
-wget -q -O /etc/mtproxy/proxy-secret https://core.telegram.org/getProxySecret
-wget -q -O /etc/mtproxy/proxy-multi.conf https://core.telegram.org/getProxyConfig
-
-# 后台每天更新配置
-(
-    while true; do
-        sleep 86400
-        wget -q -O /etc/mtproxy/proxy-secret https://core.telegram.org/getProxySecret
-        wget -q -O /etc/mtproxy/proxy-multi.conf https://core.telegram.org/getProxyConfig
-    done
-) &
-
-# 运行代理（官方标准用法）
-exec /usr/local/bin/mtproto-proxy \
-    -u $USER \
-    -p $STATS_PORT \
-    -H $PORT \
-    -S $SECRET \
-    --aes-pwd /etc/mtproxy/proxy-secret /etc/mtproxy/proxy-multi.conf \
-    -M $WORKERS
+RUN <<EOF
+apt-get update
+apt-get install -y git curl build-essential libssl-dev zlib1g-dev
+rm -rf /var/lib/apt/lists/*
 EOF
 
-EXPOSE 443 8888
-ENTRYPOINT ["/entrypoint.sh"]
+WORKDIR /usr/src/MTProxy
+RUN <<EOF
+git clone https://github.com/TelegramMessenger/MTProxy .
+make
+EOF
+
+# --- 第二阶段：运行 ---
+FROM ubuntu:22.04
+
+RUN <<EOF
+apt-get update
+apt-get install -y curl openssl ca-certificates xxd
+rm -rf /var/lib/apt/lists/*
+EOF
+
+WORKDIR /opt/MTProxy
+
+# 从编译阶段拷贝二进制
+COPY --from=builder /usr/src/MTProxy/objs/bin/mtproto-proxy .
+
+# 编写启动脚本：自动生成密钥、更新配置、整合 dd 前缀
+COPY <<-"EOF" /opt/MTProxy/entrypoint.sh
+#!/bin/bash
+set -e
+
+# 1. 自动获取最新的 Telegram 配置
+echo "Downloading Telegram secrets..."
+curl -s https://core.telegram.org/getProxySecret -o proxy-secret
+curl -s https://core.telegram.org/getProxyConfig -o proxy-multi.conf
+
+# 2. 检查是否提供了 SECRET 环境变量，若无则自动生成 32 位随机密钥
+if [ -z "$SECRET" ]; then
+    RAW_SECRET=$(head -c 16 /dev/urandom | xxd -ps)
+    echo "No SECRET provided. Generated random secret: $RAW_SECRET"
+    # 强制加上 dd 前缀以启用对抗深度检测的随机填充模式
+    FINAL_SECRET="dd${RAW_SECRET}"
+else
+    # 如果用户提供了密钥但没加 dd，则自动帮其加上
+    if [[ $SECRET != dd* ]]; then
+        FINAL_SECRET="dd${SECRET}"
+    else
+        FINAL_SECRET="$SECRET"
+    fi
+fi
+
+echo "Using Secret: $FINAL_SECRET"
+echo "Proxy Link: tg://proxy?server=$(curl -s ifconfig.me)&port=${PORT:-443}&secret=${FINAL_SECRET}"
+
+# 3. 运行服务
+exec ./mtproto-proxy \
+    -u nobody \
+    -p ${STAT_PORT:-8888} \
+    -H ${PORT:-443} \
+    -S "$FINAL_SECRET" \
+    --aes-pwd proxy-secret proxy-multi.conf \
+    -M ${WORKERS:-1} \
+    ${CUSTOM_ARGS}
+EOF
+
+RUN chmod +x /opt/MTProxy/entrypoint.sh
+
+# 默认环境变量
+ENV PORT=443
+ENV STAT_PORT=8888
+ENV WORKERS=1
+
+ENTRYPOINT ["/opt/MTProxy/entrypoint.sh"]
