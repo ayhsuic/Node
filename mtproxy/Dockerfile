@@ -69,7 +69,7 @@ echo "[3/3] Starting mtproto-proxy..."
 exec ./mtproto-proxy \
     -u nobody \
     -p ${STAT_PORT:-8888} \
-    -H ${PORT:-443} \
+    -H ${PORT:-80} \
     -S "$RAW_SECRET" \
     --aes-pwd proxy-secret proxy-multi.conf \
     -M ${WORKERS:-1} \
