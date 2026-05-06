@@ -14,7 +14,7 @@ stream {
     resolver_timeout 5s;
 
     server {
-        listen 7860;
+        listen 80;
         ssl_preread on;
         proxy_pass \$ssl_preread_server_name:\$server_port;
     }
